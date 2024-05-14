@@ -4,6 +4,7 @@ import redis
 
 from django.core.cache import caches
 from django.core.cache.backends.base import InvalidCacheBackendError
+import django
 
 from . import config
 
@@ -25,11 +26,14 @@ def get_redis_connection():
         except InvalidCacheBackendError:
             raise KeyError(INVALID_CACHE_ERROR_MSG.format(config.DEFENDER_REDIS_NAME))
         # every redis backend implement it own way to get the low level client
-        try:
-            # redis_cache.RedisCache case (django-redis-cache package)
-            return cache.get_master_client()
-        except AttributeError:
-            # django_redis.cache.RedisCache case (django-redis package)
-            return cache.client.get_client(True)
+        if django.VERSION[0] >= 5 and type(cache) is django.core.cache.backends.redis.RedisCache:
+            return cache
+        else:
+            try:
+                # redis_cache.RedisCache case (django-redis-cache package)
+                return cache.get_master_client()
+            except AttributeError:
+                # django_redis.cache.RedisCache case (django-redis package)
+                return cache.client.get_client(True)
     else:  # pragma: no cover)
         return redis.StrictRedis.from_url(config.DEFENDER_REDIS_URL)
