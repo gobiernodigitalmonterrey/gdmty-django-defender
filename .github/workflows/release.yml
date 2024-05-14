@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    if: github.repository == 'jazzband/django-defender'
+    if: github.repository == 'dobiernodigitalmonterrey/gdmty-django-defender'
     runs-on: ubuntu-latest
 
     steps:
